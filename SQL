@@ -1,0 +1,85 @@
+
+```
+-- finding all the distinch state in the data 
+SELECT DISTINCT(state)
+FROM `double-subject-354004.covid_state_history.all_state_history`
+ORDER BY state
+-- there 56 distinct state recorded 
+```
+```
+-- check how many cells have null values for death 
+SELECT COUNT(death)
+FROM `double-subject-354004.covid_state_history.all_state_history`
+WHERE death IS NOT NULL 
+```
+```
+-- check how many cells have null values for state 
+SELECT COUNT(state)
+FROM `double-subject-354004.covid_state_history.all_state_history`
+WHERE state IS NOT NULL
+```
+```
+-- chek the start and end date of the data 
+SELECT 
+  MAX(date) AS end_date,
+  MIN(date) AS start_date
+FROM `double-subject-354004.covid_state_history.all_state_history`
+ ```
+```
+--created new table that only includes data from 2020
+CREATE TABLE covid_state_history.all_state_history_2020
+AS SELECT date, state, death
+FROM `double-subject-354004.covid_state_history.all_state_history`
+WHERE date BETWEEN "2020-01-01" AND "2020-12-31"
+```
+```
+-- created new table that only inlcudes data from 2021
+CREATE TABLE covid_state_history.all_state_history_2021 
+AS SELECT date, state, death
+FROM `double-subject-354004.covid_state_history.all_state_history`
+WHERE date BETWEEN "2021-01-01" And "2021-12-31"
+```
+```
+-- added all total deaths from each state by month in 2020
+SELECT 
+  state,
+  EXTRACT(MONTH FROM date) AS month, 
+  sum(death) AS TotalDeathByState
+FROM `double-subject-354004.covid_state_history.all_state_history_2020`
+WHERE death IS NOT NULL 
+GROUP BY month, state
+ORDER BY state;
+```
+```
+-- added all total deaths from each state by month in 2021
+SELECT
+  state, 
+  EXTRACT(MONTH FROM date) AS month, 
+  sum(death) AS TotalDeathByState
+FROM `double-subject-354004.covid_state_history.all_state_history_2021`
+WHERE death IS NOT NULL
+GROUP BY month, state
+ORDER BY state;
+```
+```
+-- NEW VERSION: added total deaths from each state by month (with proper month label) in 2020 
+SELECT 
+  state, 
+  SUM(death) AS TotalDeathByState, 
+  FORMAT_DATETIME("%B", DATETIME(date)) as month_name
+FROM `double-subject-354004.covid_state_history.all_state_history_2020`
+WHERE death IS NOT NULL
+GROUP BY month_name, state
+ORDER BY state;
+```
+```
+-- NEW VERSION: added total deaths from each state by month (with proper month label) in 2021
+SELECT
+  state, 
+  SUM(death) AS TotalDeathByState, 
+  FORMAT_DATETIME("%B", DATETIME(date)) AS month_name
+FROM `double-subject-354004.covid_state_history.all_state_history_2021`
+WHERE death IS NOT NULL
+GROUP BY month_name, state 
+ORDER BY state;
+-- 2021 has only 3 months recorded in the date, which is why the data is much smaller than 2020 
